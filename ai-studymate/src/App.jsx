@@ -8,6 +8,7 @@ import Landing from './pages/Landing.jsx';
 import Login from './pages/Login.jsx';
 import SignUp from './pages/SignUp.jsx';
 import Dashboard from './pages/Dashboard.jsx';
+import HealthCheck from './pages/HealthCheck.jsx';
 import AIAssistant from './pages/AIAssistant.jsx';
 import QuizGenerator from './pages/QuizGenerator.jsx';
 import NotesSummarizer from './pages/NotesSummarizer.jsx';
@@ -38,6 +39,7 @@ export default function App() {
         <Route path="/progress" element={<Progress />} />
         <Route path="/bookmarks" element={<Bookmarks />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/health" element={<HealthCheck />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
