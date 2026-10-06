@@ -1,10 +1,4 @@
-import {
-  useEffect,
-  useRef,
-  useState,
-  type KeyboardEvent,
-  type ReactNode,
-} from "react";
+import { useState, type ReactNode } from "react";
 
 type Tab = {
   id: string;
@@ -14,109 +8,75 @@ type Tab = {
 
 type TabsProps = {
   tabs: Tab[];
-  defaultTab?: string;
 };
 
-export function Tabs({ tabs, defaultTab }: TabsProps) {
-  const [activeTab, setActiveTab] = useState(
-    defaultTab ?? tabs[0]?.id ?? ""
-  );
-
-  const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
-
-  useEffect(() => {
-    if (!tabs.some((tab) => tab.id === activeTab)) {
-      setActiveTab(tabs[0]?.id ?? "");
-    }
-  }, [tabs, activeTab]);
-
-  if (tabs.length === 0) {
-    return null;
-  }
-
-  const activeTabData = tabs.find(
-    (tab) => tab.id === activeTab
-  );
+export function Tabs({ tabs }: TabsProps) {
+  const [activeTab, setActiveTab] = useState(0);
 
   const handleKeyDown = (
-    event: KeyboardEvent<HTMLButtonElement>,
-    index: number
+    event: React.KeyboardEvent<HTMLButtonElement>
   ) => {
-    let nextIndex = index;
-
     if (event.key === "ArrowRight") {
       event.preventDefault();
-      nextIndex = (index + 1) % tabs.length;
-    } else if (event.key === "ArrowLeft") {
-      event.preventDefault();
-      nextIndex =
-        (index - 1 + tabs.length) % tabs.length;
-    } else if (event.key === "Home") {
-      event.preventDefault();
-      nextIndex = 0;
-    } else if (event.key === "End") {
-      event.preventDefault();
-      nextIndex = tabs.length - 1;
-    } else {
-      return;
+      setActiveTab((current) => (current + 1) % tabs.length);
     }
 
-    const nextTab = tabs[nextIndex];
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      setActiveTab(
+        (current) => (current - 1 + tabs.length) % tabs.length
+      );
+    }
 
-    setActiveTab(nextTab.id);
+    if (event.key === "Home") {
+      event.preventDefault();
+      setActiveTab(0);
+    }
 
-    tabRefs.current[nextIndex]?.focus();
+    if (event.key === "End") {
+      event.preventDefault();
+      setActiveTab(tabs.length - 1);
+    }
   };
 
   return (
-    <div className="w-full">
+    <div>
       <div
         role="tablist"
         aria-label="Example tabs"
         className="flex gap-2 border-b border-gray-300"
       >
-        {tabs.map((tab, index) => {
-          const isSelected = tab.id === activeTab;
-
-          return (
-            <button
-              key={tab.id}
-              ref={(element) => {
-                tabRefs.current[index] = element;
-              }}
-              type="button"
-              role="tab"
-              id={`tab-${tab.id}`}
-              aria-selected={isSelected}
-              aria-controls={`panel-${tab.id}`}
-              tabIndex={isSelected ? 0 : -1}
-              onClick={() => setActiveTab(tab.id)}
-              onKeyDown={(event) =>
-                handleKeyDown(event, index)
-              }
-              className={`rounded-t-lg px-4 py-2 font-medium focus:outline-none focus:ring-2 focus:ring-purple-600 ${
-                isSelected
-                  ? "bg-purple-700 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              {tab.label}
-            </button>
-          );
-        })}
+        {tabs.map((tab, index) => (
+          <button
+            key={tab.id}
+            type="button"
+            role="tab"
+            aria-selected={activeTab === index}
+            aria-controls={`panel-${tab.id}`}
+            id={`tab-${tab.id}`}
+            tabIndex={activeTab === index ? 0 : -1}
+            onClick={() => setActiveTab(index)}
+            onKeyDown={handleKeyDown}
+            className={`rounded-t-lg px-4 py-2 font-medium focus:outline-none focus:ring-2 focus:ring-purple-600 ${
+              activeTab === index
+                ? "bg-purple-700 text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
-      {activeTabData && (
-        <div
-          role="tabpanel"
-          id={`panel-${activeTabData.id}`}
-          aria-labelledby={`tab-${activeTabData.id}`}
-          tabIndex={0}
-          className="mt-4 rounded-lg border border-gray-200 bg-white p-5 focus:outline-none focus:ring-2 focus:ring-purple-600"
-        >
-          {activeTabData.content}
-        </div>
-      )}
+      <div
+        id={`panel-${tabs[activeTab].id}`}
+        role="tabpanel"
+        aria-labelledby={`tab-${tabs[activeTab].id}`}
+        tabIndex={0}
+        className="mt-4 rounded-lg border border-gray-200 bg-white p-5"
+      >
+        {tabs[activeTab].content}
+      </div>
     </div>
   );
 }
